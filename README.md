@@ -3,8 +3,11 @@
 
 Server Backup Bot is a Discord bot designed to back up and restore server roles and channels effortlessly. It also provides functionality to manage backups, including deleting old backup files.
 
+---
 
-https://discord.com/oauth2/authorize?client_id=1311145918938091541&permissions=8&integration_type=0&scope=bot
+### Install Discord
+
+- https://discord.com/oauth2/authorize?client_id=1311145918938091541&permissions=8&integration_type=0&scope=bot
 ---
 
 ## Features
