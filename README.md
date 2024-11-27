@@ -39,17 +39,18 @@ Server Backup Bot is a Discord bot designed to back up and restore server roles 
    ```
 
 3. Set up your configuration file:
-   - Create a `.env` or `config.json` file in the root directory.
-   - Add your bot token:
-     - `.env`:
-       ```
-       DISCORD_TOKEN=your-bot-token
-       ```
+   - Create `datastores/config.json` file in the root directory.
+
      - `config.json`:
        ```json
-       {
-           "bot_token": "your-bot-token"
-       }
+     {
+     "token": "",
+     "application_id": 0,
+     "use_Git": true,
+     "repo_url": "https://github.com/captincornflakes/Server-Clone",
+     "repo_token": "",
+     "repo_temp": "Server-Clone-main"
+     }
        ```
 
 4. Run the bot:
@@ -74,7 +75,7 @@ pip install discord.py
 ---
 
 ### 2. Missing Configuration
-If the bot cannot find the bot token, ensure you have set up the `.env` or `config.json` file correctly.
+If the bot cannot find the bot token, `datastores/config.json` file correctly.
 
 ---
 
