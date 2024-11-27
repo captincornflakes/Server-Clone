@@ -55,14 +55,14 @@ class ServerBackup(commands.Cog):
 
           # Save to file
           if not os.path.exists("backups"):
-               os.makedirs("backups")
-          file_name = f"backups/{guild.id}.json"
+               os.makedirs("datastores")
+          file_name = f"datastores/{guild.id}.json"
           with open(file_name, "w", encoding="utf-8") as file:
                json.dump(backup_data, file, indent=4)
 
           await interaction.response.send_message(f"Backup completed! Saved as `{guild.id}`.", ephemeral=True)
 
-     @discord.app_commands.command(name="restore", description="Restore server structure from a backup file")
+     @discord.app_commands.command(name="restore", description="Restore server structure")
      @discord.app_commands.default_permissions(administrator=True)
      async def restore(self, interaction: discord.Interaction, file_name: str):
           guild = interaction.guild
@@ -71,7 +71,7 @@ class ServerBackup(commands.Cog):
                return
 
           try:
-               with open(f"backups/{file_name}.json", "r", encoding="utf-8") as file:
+               with open(f"datastores/{file_name}.json", "r", encoding="utf-8") as file:
                     backup_data = json.load(file)
 
                # Restore roles
@@ -102,7 +102,20 @@ class ServerBackup(commands.Cog):
                await interaction.response.send_message("Restore completed!", ephemeral=True)
 
           except FileNotFoundError:
-               await interaction.response.send_message(f"File `{file_name}` not found. Please ensure it exists in the `backups` folder.", ephemeral=True)
+               await interaction.response.send_message(f"File `{file_name}` not found. Please ensure it exists.", ephemeral=True)
+
+     @discord.app_commands.command(name="delete_backup", description="Delete a backup")
+     @discord.app_commands.default_permissions(administrator=True)
+     async def delete_backup(self, interaction: discord.Interaction, file_name: str):
+          try:
+               file_path = f"datastores/{file_name}"
+               if os.path.exists(file_path):
+                    os.remove(file_path)
+                    await interaction.response.send_message(f"Backup `{file_name}` has been deleted.", ephemeral=True)
+               else:
+                    await interaction.response.send_message(f"Backup `{file_name}` has been deleted.", ephemeral=True)
+          except Exception as e:
+               await interaction.response.send_message(f"An error occurred while deleting the backup: {e}", ephemeral=True)
 
 async def setup(bot):
      await bot.add_cog(ServerBackup(bot))
