@@ -44,7 +44,12 @@ Server Backup Bot is a Discord bot designed to back up and restore server roles 
      - `config.json`:
        ```json
        {
-           "bot_token": "your-bot-token"
+            "token": "",
+            "application_id": 0,
+            "use_Git": true,
+            "repo_url": "https://github.com/captincornflakes/Server-Clone",
+            "repo_token": "",
+            "repo_temp": "Server-Clone-main"
        }
        ```
      - `config.json`:
