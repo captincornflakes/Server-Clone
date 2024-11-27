@@ -2,6 +2,13 @@ import discord
 from discord.ext import commands
 import json
 import os
+import random
+import string
+
+def generate_password(length=8):
+     """Generate a random password consisting of letters and digits."""
+     characters = string.ascii_letters + string.digits
+     return ''.join(random.choice(characters) for _ in range(length))
 
 class ServerBackup(commands.Cog):
      def __init__(self, bot):
@@ -28,7 +35,8 @@ class ServerBackup(commands.Cog):
                "guild_name": guild.name,
                "guild_id": guild.id,
                "roles": [],
-               "channels": []
+               "channels": [],
+               "password": generate_password()  # Generate and store a random password
           }
 
           # Backup roles
@@ -60,19 +68,28 @@ class ServerBackup(commands.Cog):
           with open(file_name, "w", encoding="utf-8") as file:
                json.dump(backup_data, file, indent=4)
 
-          await interaction.response.send_message(f"Backup completed! Saved as `{file_name}`.", ephemeral=True)
+          await interaction.response.send_message(f"Backup completed! Saved as `{guild.id}`.", ephemeral=True)
 
      @discord.app_commands.command(name="restore", description="Restore server structure")
      @discord.app_commands.default_permissions(administrator=True)
-     async def restore(self, interaction: discord.Interaction, file_name: str):
+     async def restore(self, interaction: discord.Interaction, file_name: str, password: str):
           guild = interaction.guild
           if guild is None:
                await interaction.response.send_message("This command must be used in a server.", ephemeral=True)
                return
 
+          # Ensure the file name ends with .json
+          if not file_name.endswith(".json"):
+               file_name += ".json"
+
           try:
                with open(f"datastores/{file_name}", "r", encoding="utf-8") as file:
                     backup_data = json.load(file)
+
+               # Check if the provided password matches the one in the backup
+               if backup_data["password"] != password:
+                    await interaction.response.send_message("Incorrect password. Backup cannot be restored.", ephemeral=True)
+                    return
 
                # Restore roles
                for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
@@ -107,8 +124,20 @@ class ServerBackup(commands.Cog):
 
      @discord.app_commands.command(name="delete_backup", description="Delete a backup")
      @discord.app_commands.default_permissions(administrator=True)
-     async def delete_backup(self, interaction: discord.Interaction, file_name: str):
+     async def delete_backup(self, interaction: discord.Interaction, file_name: str, password: str):
+          # Ensure the file name ends with .json
+          if not file_name.endswith(".json"):
+               file_name += ".json"
+
           try:
+               with open(f"datastores/{file_name}", "r", encoding="utf-8") as file:
+                    backup_data = json.load(file)
+
+               # Check if the provided password matches the one in the backup
+               if backup_data["password"] != password:
+                    await interaction.response.send_message("Incorrect password. Backup cannot be deleted.", ephemeral=True)
+                    return
+
                file_path = f"datastores/{file_name}"
                if os.path.exists(file_path):
                     os.remove(file_path)
