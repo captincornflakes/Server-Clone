@@ -54,13 +54,13 @@ class ServerBackup(commands.Cog):
                })
 
           # Save to file
-          if not os.path.exists("backups"):
+          if not os.path.exists("datastores"):
                os.makedirs("datastores")
           file_name = f"datastores/{guild.id}.json"
           with open(file_name, "w", encoding="utf-8") as file:
                json.dump(backup_data, file, indent=4)
 
-          await interaction.response.send_message(f"Backup completed! Saved as `{guild.id}`.", ephemeral=True)
+          await interaction.response.send_message(f"Backup completed! Saved as `{file_name}`.", ephemeral=True)
 
      @discord.app_commands.command(name="restore", description="Restore server structure")
      @discord.app_commands.default_permissions(administrator=True)
@@ -71,7 +71,7 @@ class ServerBackup(commands.Cog):
                return
 
           try:
-               with open(f"datastores/{file_name}.json", "r", encoding="utf-8") as file:
+               with open(f"datastores/{file_name}", "r", encoding="utf-8") as file:
                     backup_data = json.load(file)
 
                # Restore roles
@@ -86,16 +86,17 @@ class ServerBackup(commands.Cog):
 
                # Restore channels
                for channel_data in backup_data["channels"]:
+                    category = discord.utils.get(guild.categories, name=channel_data["category"])
                     if channel_data["type"] == "text":
                          await guild.create_text_channel(
                          name=channel_data["name"],
-                         category=discord.utils.get(guild.categories, name=channel_data["category"]),
+                         category=category,
                          position=channel_data["position"]
                          )
                     elif channel_data["type"] == "voice":
                          await guild.create_voice_channel(
                          name=channel_data["name"],
-                         category=discord.utils.get(guild.categories, name=channel_data["category"]),
+                         category=category,
                          position=channel_data["position"]
                          )
 
@@ -113,7 +114,7 @@ class ServerBackup(commands.Cog):
                     os.remove(file_path)
                     await interaction.response.send_message(f"Backup `{file_name}` has been deleted.", ephemeral=True)
                else:
-                    await interaction.response.send_message(f"Backup `{file_name}` has been deleted.", ephemeral=True)
+                    await interaction.response.send_message(f"Backup `{file_name}` does not exist.", ephemeral=True)
           except Exception as e:
                await interaction.response.send_message(f"An error occurred while deleting the backup: {e}", ephemeral=True)
 
