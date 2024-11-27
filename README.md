@@ -6,7 +6,7 @@ Server Backup Bot is a Discord bot designed to back up and restore server roles 
 ---
 
 ### Install Discord
-
+- use this link to add the existing running bot to your discord server
 - https://discord.com/oauth2/authorize?client_id=1311145918938091541&permissions=8&integration_type=0&scope=bot
 ---
 
