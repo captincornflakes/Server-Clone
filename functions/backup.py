@@ -102,40 +102,50 @@ class ServerBackup(commands.Cog):
                     await interaction.response.send_message("Incorrect password. Backup cannot be restored.", ephemeral=True)
                     return
 
-               # Restore categories first
+               # Restore categories first (only if category does not already exist)
                category_mapping = {}
                for category_data in backup_data["categories"]:
-                    category = await guild.create_category(
+                    existing_category = discord.utils.get(guild.categories, name=category_data["name"])
+                    if not existing_category:
+                         category = await guild.create_category(
                          name=category_data["name"],
                          position=category_data["position"]
-                    )
-                    category_mapping[category_data["id"]] = category  # Map category ID to the created category
+                         )
+                         category_mapping[category_data["id"]] = category  # Map category ID to the created category
+                    else:
+                         category_mapping[category_data["id"]] = existing_category  # Use the existing category
 
-               # Restore roles
+               # Restore roles (only if role does not already exist)
                for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
-                    await guild.create_role(
+                    existing_role = discord.utils.get(guild.roles, name=role_data["name"])
+                    if not existing_role:
+                         await guild.create_role(
                          name=role_data["name"],
                          permissions=discord.Permissions(role_data["permissions"]),
                          color=discord.Color(role_data["color"]),
                          hoist=role_data["hoist"],
                          mentionable=role_data["mentionable"]
-                    )
+                         )
 
-               # Restore channels
+               # Restore channels (only if channel does not already exist)
                for channel_data in backup_data["channels"]:
                     category = category_mapping.get(channel_data["category_id"])  # Get the category from the map
-                    if channel_data["type"] == "text":
-                         await guild.create_text_channel(
-                         name=channel_data["name"],
-                         category=category,
-                         position=channel_data["position"]
-                         )
-                    elif channel_data["type"] == "voice":
-                         await guild.create_voice_channel(
-                         name=channel_data["name"],
-                         category=category,
-                         position=channel_data["position"]
-                         )
+                    existing_channel = discord.utils.get(guild.channels, name=channel_data["name"])
+
+                    # Check if the channel already exists
+                    if not existing_channel:
+                         if channel_data["type"] == "text":
+                              await guild.create_text_channel(
+                                   name=channel_data["name"],
+                                   category=category,
+                                   position=channel_data["position"]
+                              )
+                         elif channel_data["type"] == "voice":
+                              await guild.create_voice_channel(
+                                   name=channel_data["name"],
+                                   category=category,
+                                   position=channel_data["position"]
+                              )
 
                await interaction.response.send_message("Restore completed!", ephemeral=True)
 
