@@ -18,7 +18,8 @@ class ServerDelete(commands.Cog):
 
      @discord.app_commands.command(name="delete_backup", description="Delete a backup")
      @discord.app_commands.default_permissions(administrator=True)
-     async def delete_backup(self, interaction: discord.Interaction, file_name: str, password: str):
+     async def delete_backup(self, interaction: discord.Interaction, name: str, password: str):
+          file_name = name
           if not file_name.endswith(".json"):
                file_name += ".json"
           try:

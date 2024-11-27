@@ -17,7 +17,8 @@ class ServerRestore(commands.Cog):
 
      @discord.app_commands.command(name="restore", description="Restore server structure")
      @discord.app_commands.default_permissions(administrator=True)
-     async def restore(self, interaction: discord.Interaction, file_name: str, password: str):
+     async def restore(self, interaction: discord.Interaction, name: str, password: str):
+          file_name = name
           guild = interaction.guild
           if guild is None:
                await interaction.response.send_message("This command must be used in a server.", ephemeral=True)
@@ -87,7 +88,7 @@ class ServerRestore(commands.Cog):
                await interaction.followup.send("Restore completed!", ephemeral=True)
 
           except FileNotFoundError:
-               await interaction.followup.send(f"File `{file_name}` not found. Please ensure it exists.", ephemeral=True)
+               await interaction.followup.send(f"Backup `{file_name}` not found.", ephemeral=True)
           except Exception as e:
                await interaction.followup.send(f"An error occurred: {e}", ephemeral=True)
 

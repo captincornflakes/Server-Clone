@@ -16,8 +16,8 @@ Server Backup Bot is a Discord bot designed to back up and restore server roles 
 - **Delete Backups**: Remove outdated or unnecessary backups.
 - **Slash Commands**:
   - `/backup`: Creates a new backup of the server’s roles, channels, and configurations. The backup includes a random password for restoration.
-  - `/restore file_name:<file_name> password:<password>`: Restores the server structure from a specific backup. The backup is restored using the provided password (the password is generated during the backup creation).
-  - `/delete_backup file_name:<file_name> password:<password>`: Deletes a specific backup .
+  - `/restore name:<name> password:<password>`: Restores the server structure from a specific backup. The backup is restored using the provided password (the password is generated during the backup creation).
+  - `/delete_backup name:<name> password:<password>`: Deletes a specific backup .
 
 ---
 
