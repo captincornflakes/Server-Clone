@@ -23,7 +23,7 @@ class ServerBackup(commands.Cog):
           except Exception as e:
                print(f"Error syncing commands: {e}")
 
-     @discord.app_commands.command(name="backup", description="Back up all server channels and roles")
+     @discord.app_commands.command(name="backup", description="Back up all server channels, roles, and categories")
      @discord.app_commands.default_permissions(administrator=True)
      async def backup(self, interaction: discord.Interaction):
           guild = interaction.guild
@@ -36,6 +36,7 @@ class ServerBackup(commands.Cog):
                "guild_id": guild.id,
                "roles": [],
                "channels": [],
+               "categories": [],
                "password": generate_password()  # Generate and store a random password
           }
 
@@ -51,15 +52,24 @@ class ServerBackup(commands.Cog):
                     "id": role.id
                })
 
-          # Backup channels
-          for channel in guild.channels:
-               backup_data["channels"].append({
-                    "name": channel.name,
-                    "id": channel.id,
-                    "type": str(channel.type),
-                    "position": channel.position,
-                    "category": channel.category.name if channel.category else None
+          # Backup categories
+          for category in guild.categories:
+               backup_data["categories"].append({
+                    "name": category.name,
+                    "id": category.id,
+                    "position": category.position
                })
+
+          # Backup channels (including category info for proper restoration)
+          for channel in guild.channels:
+               if isinstance(channel, discord.TextChannel) or isinstance(channel, discord.VoiceChannel):
+                    backup_data["channels"].append({
+                         "name": channel.name,
+                         "id": channel.id,
+                         "type": str(channel.type),
+                         "position": channel.position,
+                         "category_id": channel.category.id if channel.category else None
+                    })
 
           # Save to file
           if not os.path.exists("datastores"):
@@ -92,6 +102,15 @@ class ServerBackup(commands.Cog):
                     await interaction.response.send_message("Incorrect password. Backup cannot be restored.", ephemeral=True)
                     return
 
+               # Restore categories first
+               category_mapping = {}
+               for category_data in backup_data["categories"]:
+                    category = await guild.create_category(
+                         name=category_data["name"],
+                         position=category_data["position"]
+                    )
+                    category_mapping[category_data["id"]] = category  # Map category ID to the created category
+
                # Restore roles
                for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
                     await guild.create_role(
@@ -104,7 +123,7 @@ class ServerBackup(commands.Cog):
 
                # Restore channels
                for channel_data in backup_data["channels"]:
-                    category = discord.utils.get(guild.categories, name=channel_data["category"])
+                    category = category_mapping.get(channel_data["category_id"])  # Get the category from the map
                     if channel_data["type"] == "text":
                          await guild.create_text_channel(
                          name=channel_data["name"],
@@ -121,7 +140,7 @@ class ServerBackup(commands.Cog):
                await interaction.response.send_message("Restore completed!", ephemeral=True)
 
           except FileNotFoundError:
-               await interaction.response.send_message(f"Backup `{file_name}` not found. Please ensure it exists.", ephemeral=True)
+               await interaction.response.send_message(f"File `{file_name}` not found. Please ensure it exists.", ephemeral=True)
 
      @discord.app_commands.command(name="delete_backup", description="Delete a backup")
      @discord.app_commands.default_permissions(administrator=True)
