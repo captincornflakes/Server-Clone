@@ -121,7 +121,7 @@ class ServerBackup(commands.Cog):
                await interaction.response.send_message("Restore completed!", ephemeral=True)
 
           except FileNotFoundError:
-               await interaction.response.send_message(f"File `{file_name}` not found. Please ensure it exists.", ephemeral=True)
+               await interaction.response.send_message(f"Backup `{file_name}` not found. Please ensure it exists.", ephemeral=True)
 
      @discord.app_commands.command(name="delete_backup", description="Delete a backup")
      @discord.app_commands.default_permissions(administrator=True)
