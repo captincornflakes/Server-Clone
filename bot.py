@@ -17,23 +17,28 @@ handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w'
 logging.basicConfig(level=logging.INFO, handlers=[handler])
 
 
-def download_repo_as_zip(repo_url, token, temp_folder):
+
+def download_repo_as_zip(repo_url, temp_folder):
+    # Remove the need for a token, use a public URL for downloading the zip file
     zip_url = f"{repo_url}/archive/refs/heads/main.zip"
-    headers = {'Authorization': f'token {token}'}
     print(f"Downloading repository from {zip_url}...")
+    
     try:
-        response = requests.get(zip_url, headers=headers)
+        response = requests.get(zip_url)
         response.raise_for_status()  # Raise an error for HTTP errors
     except requests.exceptions.RequestException as e:
         print(f"Failed to download repository: {e}")
         raise
+    
     print(f"Extracting ZIP file to {temp_folder}...")
+    
     try:
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_file:
             zip_file.extractall(temp_folder)
     except zipfile.BadZipFile as e:
         print(f"Failed to extract ZIP file: {e}")
         raise
+    
     print(f"Repository extracted to {temp_folder}.")
 
 def extract_functions_folder(temp_folder, target_folder):
@@ -58,11 +63,10 @@ def load_github():
     if config['use_Git']:
         print("Pulling repository from GitHub...")
         repo_url = config['repo_url']
-        token =  config['repo_token']
         temp_folder = "repository_contents"
         target_folder = "functions"
         try:
-            download_repo_as_zip(repo_url, token, temp_folder)
+            download_repo_as_zip(repo_url, temp_folder)  # No need for token
             extract_functions_folder(temp_folder, target_folder)
         finally:
             if os.path.exists(temp_folder):
