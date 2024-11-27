@@ -68,7 +68,8 @@ class ServerBackup(commands.Cog):
           with open(file_name, "w", encoding="utf-8") as file:
                json.dump(backup_data, file, indent=4)
 
-          await interaction.response.send_message(f"Backup completed! Saved as `{guild.id}`.", ephemeral=True)
+          # Return guild ID and password in response message
+          await interaction.response.send_message(f"Backup completed! Saved as `{guild.id}`. The password is `{backup_data['password']}`.", ephemeral=True)
 
      @discord.app_commands.command(name="restore", description="Restore server structure")
      @discord.app_commands.default_permissions(administrator=True)
