@@ -43,6 +43,7 @@ class ServerBackup(commands.Cog):
                     "id": role.id
                })
 
+
           # Backup channels
           for channel in guild.channels:
                backup_data["channels"].append({
