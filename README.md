@@ -9,18 +9,18 @@ Server Backup Bot is a Discord bot designed to back up and restore server roles 
 - use this link to add the existing running bot to your discord server
 - https://discord.com/oauth2/authorize?client_id=1311145918938091541&permissions=8&integration_type=0&scope=bot
 ---
-
 ## Features
 
-- **Backup Server Structure**: Save roles, channels, and their configurations.
-- **Restore Backups**: Recreate roles and channels from a previous backup.
+- **Backup Server Structure**: Save roles, channels, and their configurations (including categories).
+- **Restore Backups**: Recreate roles, channels, and categories from a previous backup.
 - **Delete Backups**: Remove outdated or unnecessary backups.
 - **Slash Commands**:
-  - `/backup`: Creates a new backup.
-  - `/restore file_name:<file_name>`: Restores from a specific backup file.
-  - `/delete_backup file_name:<file_name>`: Deletes a specific backup file.
+  - `/backup`: Creates a new backup of the server’s roles, channels, and configurations. The backup includes a random password for restoration.
+  - `/restore file_name:<file_name> password:<password>`: Restores the server structure from a specific backup. The backup is restored using the provided password (the password is generated during the backup creation).
+  - `/delete_backup file_name:<file_name> password:<password>`: Deletes a specific backup .
 
 ---
+
 
 ## Getting Started
 
