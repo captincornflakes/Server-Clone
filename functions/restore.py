@@ -41,16 +41,28 @@ class ServerRestore(commands.Cog):
                     await interaction.followup.send("Incorrect password. Backup cannot be restored.", ephemeral=True)
                     return
 
-               # Restore categories first (only if category does not already exist)
+               # Restore categories and their permissions
                category_mapping = {}
                for category_data in backup_data["categories"]:
                     existing_category = discord.utils.get(guild.categories, name=category_data["name"])
                     if not existing_category:
                          category = await guild.create_category(
-                         name=category_data["name"],
-                         position=category_data["position"]
+                              name=category_data["name"],
+                              position=category_data["position"]
                          )
                          category_mapping[category_data["id"]] = category
+
+                         # Restore permissions for the category
+                         for perm in category_data["permissions"]:
+                              target = (discord.utils.get(guild.roles, id=perm["target_id"]) 
+                                        if perm["target_type"] == "role" else
+                                        discord.utils.get(guild.members, id=perm["target_id"]))
+                              if target:
+                                   overwrite = discord.PermissionOverwrite.from_pair(
+                                        discord.Permissions(perm["allow"]),
+                                        discord.Permissions(perm["deny"])
+                                   )
+                              await category.set_permissions(target, overwrite=overwrite)
                     else:
                          category_mapping[category_data["id"]] = existing_category
 

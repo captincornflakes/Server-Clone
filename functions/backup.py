@@ -55,12 +55,22 @@ class ServerBackup(commands.Cog):
                     "id": role.id
                })
 
+          
           # Backup categories
           for category in guild.categories:
+               permissions = []
+               for target, overwrite in category.overwrites.items():
+                    permissions.append({
+                         "target_id": target.id,
+                         "target_type": "role" if isinstance(target, discord.Role) else "member",
+                         "allow": overwrite.pair()[0].value,
+                         "deny": overwrite.pair()[1].value
+                    })
                backup_data["categories"].append({
                     "name": category.name,
                     "id": category.id,
-                    "position": category.position
+                    "position": category.position,
+                    "permissions": permissions
                })
 
           # Backup channels
