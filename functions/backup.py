@@ -24,7 +24,7 @@ class ServerBackup(commands.Cog):
           except Exception as e:
                print(f"Error syncing commands: {e}")
 
-     @discord.app_commands.command(name="backup", description="Back up all server channels, roles, and categories")
+     @discord.app_commands.command(name="backup", description="Back up all server channels, roles, categories, and their permissions")
      @discord.app_commands.default_permissions(administrator=True)
      async def backup(self, interaction: discord.Interaction):
           guild = interaction.guild
@@ -34,11 +34,11 @@ class ServerBackup(commands.Cog):
 
           backup_data = {
                "guild_name": guild.name,
-               "password": generate_password(),  # Generate and store a random password
                "guild_id": guild.id,
                "roles": [],
                "channels": [],
-               "categories": []
+               "categories": [],
+               "password": generate_password()  # Generate and store a random password
           }
 
           # Backup roles (skip managed roles)
@@ -55,7 +55,6 @@ class ServerBackup(commands.Cog):
                     "id": role.id
                })
 
-          
           # Backup categories
           for category in guild.categories:
                permissions = []

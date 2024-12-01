@@ -66,23 +66,19 @@ class ServerRestore(commands.Cog):
                     else:
                          category_mapping[category_data["id"]] = existing_category
 
-               # Restore roles (only if role does not already exist)
-               role_mapping = {}
+               # Restore roles (skip existing ones)
                for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
                     existing_role = discord.utils.get(guild.roles, name=role_data["name"])
                     if not existing_role:
-                         role = await guild.create_role(
-                         name=role_data["name"],
-                         permissions=discord.Permissions(role_data["permissions"]),
-                         color=discord.Color(role_data["color"]),
-                         hoist=role_data["hoist"],
-                         mentionable=role_data["mentionable"]
+                         await guild.create_role(
+                              name=role_data["name"],
+                              permissions=discord.Permissions(role_data["permissions"]),
+                              color=discord.Color(role_data["color"]),
+                              hoist=role_data["hoist"],
+                              mentionable=role_data["mentionable"]
                          )
-                         role_mapping[role_data["id"]] = role
-                    else:
-                         role_mapping[role_data["id"]] = existing_role
 
-               # Restore channels and permissions (only if channel does not already exist)
+               # Restore channels (skip existing ones)
                for channel_data in backup_data["channels"]:
                     category = category_mapping.get(channel_data["category_id"])
                     existing_channel = discord.utils.get(guild.channels, name=channel_data["name"])
@@ -90,30 +86,28 @@ class ServerRestore(commands.Cog):
                     if not existing_channel:
                          if channel_data["type"] == "text":
                               channel = await guild.create_text_channel(
-                                   name=channel_data["name"],
-                                   category=category,
-                                   position=channel_data["position"]
+                              name=channel_data["name"],
+                              category=category,
+                              position=channel_data["position"]
                               )
                          elif channel_data["type"] == "voice":
                               channel = await guild.create_voice_channel(
-                                   name=channel_data["name"],
-                                   category=category,
-                                   position=channel_data["position"]
+                              name=channel_data["name"],
+                              category=category,
+                              position=channel_data["position"]
                               )
-                         else:
-                              continue
 
-                         # Apply permissions
-                         for permission_data in channel_data["permissions"]:
-                              target_id = permission_data["target_id"]
-                              target = guild.get_role(target_id) if permission_data["target_type"] == "role" else guild.get_member(target_id)
+                         # Restore permissions for the channel
+                         for perm in channel_data["permissions"]:
+                              target = (discord.utils.get(guild.roles, id=perm["target_id"]) 
+                                        if perm["target_type"] == "role" else
+                                        discord.utils.get(guild.members, id=perm["target_id"]))
                               if target:
-                                   overwrite = discord.PermissionOverwrite()
-                                   overwrite.update(
-                                        allow=discord.Permissions(permission_data["allow"]),
-                                        deny=discord.Permissions(permission_data["deny"])
+                                   overwrite = discord.PermissionOverwrite.from_pair(
+                                        discord.Permissions(perm["allow"]),
+                                        discord.Permissions(perm["deny"])
                                    )
-                                   await channel.set_permissions(target, overwrite=overwrite)
+                              await channel.set_permissions(target, overwrite=overwrite)
 
                await interaction.followup.send("Restore completed!", ephemeral=True)
 
@@ -121,6 +115,7 @@ class ServerRestore(commands.Cog):
                await interaction.followup.send(f"Backup `{file_name}` not found.", ephemeral=True)
           except Exception as e:
                await interaction.followup.send(f"An error occurred: {e}", ephemeral=True)
+
 
 
 async def setup(bot):
