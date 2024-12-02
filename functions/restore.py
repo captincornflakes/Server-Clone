@@ -62,7 +62,10 @@ class ServerRestore(commands.Cog):
                                         discord.Permissions(perm["allow"]),
                                         discord.Permissions(perm["deny"])
                                    )
-                              await category.set_permissions(target, overwrite=overwrite)
+                                   await category.set_permissions(target, overwrite=overwrite)
+                              else:
+                                   print(f"Target not found for permission: {perm}")  # Debug message
+
                     else:
                          category_mapping[category_data["id"]] = existing_category
 
@@ -107,7 +110,9 @@ class ServerRestore(commands.Cog):
                                         discord.Permissions(perm["allow"]),
                                         discord.Permissions(perm["deny"])
                                    )
-                              await channel.set_permissions(target, overwrite=overwrite)
+                                   await channel.set_permissions(target, overwrite=overwrite)
+                              else:
+                                   print(f"Target not found for permission: {perm}")  # Debug message
 
                await interaction.followup.send("Restore completed!", ephemeral=True)
 
