@@ -41,6 +41,18 @@ class ServerRestore(commands.Cog):
                     await interaction.followup.send("Incorrect password. Backup cannot be restored.", ephemeral=True)
                     return
 
+               # Restore roles (skip existing ones)
+               for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
+                    existing_role = discord.utils.get(guild.roles, name=role_data["name"])
+                    if not existing_role:
+                         await guild.create_role(
+                              name=role_data["name"],
+                              permissions=discord.Permissions(role_data["permissions"]),
+                              color=discord.Color(role_data["color"]),
+                              hoist=role_data["hoist"],
+                              mentionable=role_data["mentionable"]
+                         )
+                         
                # Restore categories and their permissions
                category_mapping = {}
                for category_data in backup_data["categories"]:
@@ -68,18 +80,6 @@ class ServerRestore(commands.Cog):
 
                     else:
                          category_mapping[category_data["id"]] = existing_category
-
-               # Restore roles (skip existing ones)
-               for role_data in reversed(backup_data["roles"]):  # Reverse to maintain hierarchy
-                    existing_role = discord.utils.get(guild.roles, name=role_data["name"])
-                    if not existing_role:
-                         await guild.create_role(
-                              name=role_data["name"],
-                              permissions=discord.Permissions(role_data["permissions"]),
-                              color=discord.Color(role_data["color"]),
-                              hoist=role_data["hoist"],
-                              mentionable=role_data["mentionable"]
-                         )
 
                # Restore channels (skip existing ones)
                for channel_data in backup_data["channels"]:
